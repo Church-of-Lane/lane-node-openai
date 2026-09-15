@@ -12,8 +12,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../Lane.Node.Sdk/Lane.Node.Sdk.csproj" />
-    <ProjectReference Include="../../Lane.Providers/Lane.Providers.csproj" />
+    <PackageReference Include="Lane.Node.Sdk" Version="0.1.0" />
+    <PackageReference Include="Lane.Providers" Version="0.1.0" />
   </ItemGroup>
 
 </Project>

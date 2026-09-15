@@ -186,10 +186,15 @@ app.MapPost("/api/security-key/assert", (SecurityKeyAssertion body, NodeRunner r
 
 using HttpClient laneHttp = new();
 
-app.MapGet("/lane", () => Results.Redirect("/lane/"));
-
 app.Map("/lane/{**path}", async (HttpContext context, string? path, SettingsStore store) =>
 {
+    // Routing ignores trailing slashes, but the portal's relative links need one.
+    if (context.Request.Path.Value == "/lane")
+    {
+        context.Response.Redirect("/lane/" + context.Request.QueryString);
+        return;
+    }
+
     if (!Uri.TryCreate(store.Load().LaneUrl, UriKind.Absolute, out Uri? lane))
     {
         context.Response.StatusCode = StatusCodes.Status502BadGateway;

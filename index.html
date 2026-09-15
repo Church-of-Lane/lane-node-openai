@@ -6,57 +6,66 @@
 <title>Lane Node</title>
 <style>
   :root {
-    --bg: #f6f5f2; --panel: #ffffff; --text: #1d1d1f; --muted: #6b6b70; --border: #e2e0db;
-    --input: #ffffff; --accent: #3a5bd9; --on-accent: #ffffff;
-    --ok: #1f8a4c; --warn: #b7791f; --bad: #c0392b;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #141416; --panel: #1d1d20; --text: #ececef; --muted: #9a9aa2; --border: #2e2e33;
-      --input: #161618; --accent: #7b93ff; --on-accent: #0d0d10;
-      --ok: #4cc38a; --warn: #e0a84a; --bad: #ff6b5e;
-    }
+    color-scheme: dark;
+    --bg: #1e1e1e; --panel: #333333; --text: #999999; --bright: #cccccc; --muted: #777777;
+    --border: #555555; --input-border: #666666; --accent: #32dd72;
+    --ok: #32dd72; --warn: #dddd57; --bad: #dd5757;
   }
   * { box-sizing: border-box; }
-  body { margin: 0; font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); }
-  main { max-width: 960px; margin: 0 auto; padding: 24px 16px 48px; display: grid; gap: 16px; }
-  header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-  h1 { font-size: 20px; margin: 0; }
-  h2 { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 0 0 12px; }
-  h2:not(:first-child) { margin-top: 20px; }
-  a { color: var(--accent); }
-  .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
-  label { display: grid; gap: 4px; font-size: 12px; color: var(--muted); }
-  input, select, textarea { font: inherit; color: var(--text); background: var(--input); border: 1px solid var(--border); border-radius: 6px; padding: 7px 9px; min-width: 0; }
-  textarea { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; resize: vertical; }
-  input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
-  summary { cursor: pointer; color: var(--muted); font-size: 13px; }
-  .muted { color: var(--muted); margin: 8px 0 0; font-size: 13px; }
-  .caps { display: flex; flex-wrap: wrap; gap: 6px 16px; }
-  .caps label { display: flex; align-items: center; gap: 6px; color: var(--text); font-size: 13px; }
-  .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-  .security-key { margin-top: 12px; justify-content: space-between; border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
-  button { font: inherit; border-radius: 6px; padding: 8px 14px; border: 1px solid var(--border); background: var(--panel); color: var(--text); cursor: pointer; }
-  button.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+  body {
+    margin: 0; position: relative; font: 12px/1.45 sans-serif; color: var(--text);
+    background: var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Cpath d='M24.5 16v16M20 21.5h9M72.5 64v16M68 69.5h9' stroke='%232e2e2e' fill='none'/%3E%3Cpath d='M72 24h1v1h-1zM24 72h1v1h-1z' fill='%232a2a2a'/%3E%3C/svg%3E") fixed;
+  }
+  body::before {
+    content: ""; position: fixed; inset: 0; pointer-events: none;
+    background:
+      repeating-linear-gradient(0deg, rgba(0, 0, 0, .14) 0 1px, transparent 1px 3px),
+      radial-gradient(ellipse at center, transparent 50%, rgba(0, 0, 0, .5));
+  }
+  main { position: relative; z-index: 1; max-width: 960px; margin: 0 auto; padding: 12px 12px 48px; display: grid; gap: 12px; }
+  header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--panel); }
+  h1 { font: 20pt tahoma, sans-serif; letter-spacing: -2px; color: var(--accent); text-shadow: 0 0 10px rgba(50, 221, 114, .35); margin: 0; }
+  h2 { font: bold 12px sans-serif; background: var(--accent); color: #000000; padding: 2px 6px; margin: -8px -8px 8px; }
+  h2:not(:first-child) { margin-top: 12px; }
+  a:link, a:visited { color: var(--bright); text-decoration: none; }
+  a:hover { color: #ffffff; }
+  .panel { background: var(--panel); border: 1px solid var(--border); padding: 8px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+  label { display: grid; gap: 2px; font-weight: bold; color: #aaaaaa; }
+  input, select, textarea { font: 10pt sans-serif; color: var(--bright); background: var(--panel); border: 1px solid var(--input-border); border-radius: 0; padding: 3px 5px; min-width: 0; }
+  textarea { font-family: monospace; font-size: 12px; resize: vertical; }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: #aaaaaa; }
+  input[type=checkbox] { accent-color: var(--accent); }
+  summary { cursor: pointer; color: var(--bright); }
+  .muted { color: var(--muted); margin: 8px 0 0; }
+  .caps { display: flex; flex-wrap: wrap; gap: 4px 16px; }
+  .caps label { display: flex; align-items: center; gap: 6px; font-weight: normal; color: var(--bright); }
+  .row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  .security-key { margin-top: 12px; justify-content: space-between; background: var(--bg); border: 1px solid var(--border); padding: 6px 8px; }
+  button { font: 12px sans-serif; border-radius: 0; padding: 3px 10px; border: 1px solid #888888; background: var(--panel); color: var(--bright); cursor: pointer; }
+  button:hover:not(:disabled) { background: var(--border); color: var(--accent); }
+  button.primary { color: var(--accent); }
   button:disabled { opacity: .5; cursor: default; }
-  .pill { display: inline-flex; align-items: center; gap: 8px; padding: 4px 12px; border-radius: 999px; border: 1px solid var(--border); background: var(--panel); font-size: 13px; }
-  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
-  .pill[data-status=Connected] .dot { background: var(--ok); }
+  .pill { display: inline-flex; align-items: center; gap: 6px; color: var(--bright); }
+  .pill::before { content: "["; color: var(--text); }
+  .pill::after { content: "]"; color: var(--text); }
+  .dot { display: inline-block; width: 8px; height: 8px; background: var(--bg); border: 1px solid var(--input-border); }
+  .pill[data-status=Connected] .dot { background: var(--ok); border-color: var(--ok); }
   .pill[data-status=Connecting] .dot,
-  .pill[data-status=WaitingForTouch] .dot { background: var(--warn); }
-  .pill[data-status=Failed] .dot { background: var(--bad); }
-  dl { display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; margin: 0; }
-  dt { color: var(--muted); }
-  dd { margin: 0; overflow-wrap: anywhere; }
-  code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; }
-  .error { color: var(--bad); margin: 12px 0 0; }
-  .notice { color: var(--warn); margin: 12px 0 0; }
-  pre#logs { margin: 0; max-height: 300px; overflow: auto; line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere; }
-  dialog { border: 1px solid var(--border); border-radius: 12px; background: var(--panel); color: var(--text); padding: 24px; width: min(400px, 92vw); text-align: center; }
-  dialog::backdrop { background: rgb(0 0 0 / .45); }
-  dialog p { margin: 0 0 12px; color: var(--muted); }
-  .key-icon { width: 56px; height: 56px; margin: 4px auto 12px; color: var(--accent); animation: pulse 1.6s ease-in-out infinite; }
+  .pill[data-status=WaitingForTouch] .dot { background: var(--warn); border-color: var(--warn); }
+  .pill[data-status=Failed] .dot { background: var(--bad); border-color: var(--bad); }
+  dl { display: grid; grid-template-columns: max-content 1fr; gap: 3px 16px; margin: 0; }
+  dt { font-weight: bold; color: #aaaaaa; }
+  dd { margin: 0; color: var(--bright); overflow-wrap: anywhere; }
+  code, pre { font-family: monospace; font-size: 12px; color: var(--bright); }
+  .error { color: var(--bad); margin: 8px 0 0; }
+  .notice { color: var(--warn); margin: 8px 0 0; }
+  pre#logs { margin: 0; max-height: 300px; overflow: auto; background: var(--bg); border: 1px solid var(--border); padding: 6px 8px; white-space: pre-wrap; overflow-wrap: anywhere; }
+  dialog { border: 1px solid var(--border); background: var(--panel); color: var(--text); padding: 8px; width: min(400px, 92vw); text-align: center; }
+  dialog::backdrop { background: rgb(0 0 0 / .6); }
+  dialog h2 { text-align: left; }
+  dialog p { margin: 0 0 8px; }
+  .key-icon { width: 48px; height: 48px; margin: 4px auto 8px; color: var(--accent); animation: pulse 1.6s ease-in-out infinite; }
   @keyframes pulse { 50% { opacity: .45; } }
   @media (prefers-reduced-motion: reduce) { .key-icon { animation: none; } }
   [hidden] { display: none !important; }
@@ -156,12 +165,12 @@
 </main>
 
 <dialog id="touch-dialog">
+  <h2>Security key</h2>
   <svg class="key-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
     <rect x="7" y="2" width="10" height="14" rx="2"></rect>
     <path d="M9 16v4a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2v-4"></path>
     <circle cx="12" cy="9" r="2.2"></circle>
   </svg>
-  <h2>Security key</h2>
   <p>Insert your security key and tap it to start the node</p>
   <p class="error" id="touch-error" hidden></p>
   <div class="row" style="justify-content: center; margin-top: 16px">

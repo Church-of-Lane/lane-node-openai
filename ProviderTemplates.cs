@@ -60,7 +60,9 @@ public static partial class ProviderTemplates
     /// <summary>Whether a Gemini model id names a model that answers in text, judged by its name.</summary>
     public static bool IsGeminiTextModel(string id) => !NonTextGeminiModel().IsMatch(id);
 
-    [GeneratedRegex(@"(^|-)(embedding|image|imagen|veo|tts|audio|live|lyria|aqa)(-|$)", RegexOptions.IgnoreCase)]
+    [GeneratedRegex(
+        @"(^|-)(embedding|image|imagen|veo|tts|audio|live|lyria|aqa|banana|computer-use|deep-research)(-|$)",
+        RegexOptions.IgnoreCase)]
     private static partial Regex NonTextGeminiModel();
 
     public static bool SameEndpoint(string a, string b) =>
