@@ -38,14 +38,21 @@ public static partial class ProviderTemplates
         [],
         ["Tools", "Streaming", "Images", "StructuredOutput", "StopSequences"]);
 
+    public static ProviderTemplate Ollama { get; } = new(
+        "ollama", "Ollama (local)",
+        "http://localhost:11434/v1", "chat/completions", "models",
+        "llama3.1:8b", "Not needed for Ollama", null, KeyRequired: false,
+        [],
+        ["Tools", "Streaming", "StopSequences"]);
+
     public static ProviderTemplate Custom { get; } = new(
         CustomId, "Custom (any OpenAI-compatible API)",
-        "http://localhost:11434/v1", "chat/completions", "models",
+        "https://api.openai.com/v1", "chat/completions", "models",
         "model name", "Optional for local servers", null, KeyRequired: false,
         [],
         ["Tools", "Streaming", "StopSequences"]);
 
-    public static IReadOnlyList<ProviderTemplate> All { get; } = [OpenRouter, Gemini, Custom];
+    public static IReadOnlyList<ProviderTemplate> All { get; } = [OpenRouter, Gemini, Ollama, Custom];
 
     public static ProviderTemplate Find(string? id) =>
         All.FirstOrDefault(t => string.Equals(t.Id, id, StringComparison.OrdinalIgnoreCase)) ?? Custom;

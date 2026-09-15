@@ -5,15 +5,17 @@ using Lane.Node.OpenAi;
 using Lane.Node.Sdk;
 using Lane.Nodes.Protocol;
 
-// A Lane node that answers every request with one model from any OpenAI-compatible API, with templates for OpenRouter and
-// Google Gemini, configured from a local web page. Its identity is either a security key, used through the browser's
+// A Lane node that answers every request with one model from any OpenAI-compatible API, with templates for OpenRouter,
+// Google Gemini and a local Ollama instance, configured from a local web page. Its identity is either a security key, used through the browser's
 // WebAuthn prompt (which only works when the page is served from localhost), or a key pair kept in a PEM file.
 //
-//   dotnet run --project Examples/Lane.Node.OpenAi [-- --urls http://localhost:5075] [--no-browser]
+//   dotnet run --project Examples/Lane.Node.OpenAi [-- --urls http://localhost:5075] [--no-browser] [--no-update-check]
 
 bool openBrowser = !args.Contains("--no-browser");
+bool checkUpdates = !args.Contains("--no-update-check") && Environment.GetEnvironmentVariable("LANE_NO_UPDATE_CHECK") is null;
 
-WebApplicationBuilder builder = WebApplication.CreateBuilder([.. args.Where(a => a != "--no-browser")]);
+WebApplicationBuilder builder =
+    WebApplication.CreateBuilder([.. args.Where(a => a is not ("--no-browser" or "--no-update-check"))]);
 
 if (string.IsNullOrEmpty(builder.Configuration["urls"]))
     builder.WebHost.UseUrls("http://localhost:5075");
@@ -239,6 +241,9 @@ app.Map("/lane/{**path}", async (HttpContext context, string? path, SettingsStor
         await context.Response.WriteAsync($"Could not reach Lane at {target.Uri.GetLeftPart(UriPartial.Authority)}: {ex.Message}");
     }
 });
+
+if (checkUpdates)
+    UpdateCheck.RunInBackground(app.Environment.ContentRootPath);
 
 if (openBrowser)
     app.Lifetime.ApplicationStarted.Register(() => OpenBrowser(app.Urls.First()));
