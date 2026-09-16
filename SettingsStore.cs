@@ -39,6 +39,15 @@ public sealed class SettingsStore
         }
     }
 
+    /// <summary>
+    /// Replaces the current settings without writing them to disk, for the ones given on the command line. They are saved
+    /// like any others once the node is started.
+    /// </summary>
+    public void Override(NodeSettings settings)
+    {
+        lock (_gate) _cached = settings with { ApiKey = null };
+    }
+
     public void Save(NodeSettings settings)
     {
         NodeSettings clean = settings with { ApiKey = null };

@@ -6,16 +6,31 @@ using Lane.Node.Sdk;
 using Lane.Nodes.Protocol;
 
 // A Lane node that answers every request with one model from any OpenAI-compatible API, with templates for OpenRouter,
-// Google Gemini and a local Ollama instance, configured from a local web page. Its identity is either a security key, used through the browser's
-// WebAuthn prompt (which only works when the page is served from localhost), or a key pair kept in a PEM file.
+// Google Gemini and a local Ollama instance, configured from a local web page or the command line. Its identity is either
+// a security key, used through the browser's WebAuthn prompt (which only works when the page is served from localhost),
+// or a key pair kept in a PEM file.
 //
-//   dotnet run --project Examples/Lane.Node.OpenAi [-- --urls http://localhost:5075] [--no-browser] [--no-update-check]
+//   dotnet run -- --help
 
-bool openBrowser = !args.Contains("--no-browser");
-bool checkUpdates = !args.Contains("--no-update-check") && Environment.GetEnvironmentVariable("LANE_NO_UPDATE_CHECK") is null;
+if (CommandLine.WantsHelp(args))
+{
+    Console.WriteLine(CommandLine.Usage);
+    return 0;
+}
 
-WebApplicationBuilder builder =
-    WebApplication.CreateBuilder([.. args.Where(a => a is not ("--no-browser" or "--no-update-check"))]);
+CommandLine options;
+
+try
+{
+    options = CommandLine.Parse(args);
+}
+catch (ArgumentException ex)
+{
+    Console.Error.WriteLine(ex.Message);
+    return 1;
+}
+
+WebApplicationBuilder builder = WebApplication.CreateBuilder(options.HostArgs);
 
 if (string.IsNullOrEmpty(builder.Configuration["urls"]))
     builder.WebHost.UseUrls("http://localhost:5075");
@@ -242,13 +257,28 @@ app.Map("/lane/{**path}", async (HttpContext context, string? path, SettingsStor
     }
 });
 
-if (checkUpdates)
+ApplyCommandLine(options, app.Services);
+
+if (options.CheckUpdates)
     UpdateCheck.RunInBackground(app.Environment.ContentRootPath);
 
-if (openBrowser)
+if (options.OpenBrowser)
     app.Lifetime.ApplicationStarted.Register(() => OpenBrowser(app.Urls.First()));
 
 await app.RunAsync();
+
+return 0;
+
+/// <summary>Lays the settings given on the command line over the saved ones, without writing them to disk.</summary>
+static void ApplyCommandLine(CommandLine options, IServiceProvider services)
+{
+    SettingsStore store = services.GetRequiredService<SettingsStore>();
+
+    if (options.Overrides.Any) store.Override(options.Overrides.Apply(store.Load()));
+
+    if (options.ApiKey is { } key)
+        services.GetRequiredService<NodeRunner>().RememberKey(store.Load().Endpoint, key);
+}
 
 static string? RegisteredKeyId(NodeSettings settings)
 {

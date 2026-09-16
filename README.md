@@ -46,6 +46,16 @@ dotnet run
 
 The app starts on <http://localhost:5075> and opens it in your browser.
 
+Every field of the node's form can also be set on the command line, so you can preload it instead of filling it in each
+time:
+
+```sh
+dotnet run -- --provider ollama --model llama3.1:8b --pool default
+dotnet run -- --help
+```
+
+See [Command line options](COMMAND-LINE.md) for the full list.
+
 ### Update check
 
 On startup the node quietly compares itself against its upstream repositories and prints a note in the console if either
@@ -62,7 +72,8 @@ with `dotnet run -- --no-update-check`, or by setting `LANE_NO_UPDATE_CHECK`.
 
 ## Use
 
-Open the page (<http://localhost:5075> by default) and work through the form from top to bottom.
+Open the page (<http://localhost:5075> by default) and work through the form from top to bottom. Anything you pass on
+the [command line](COMMAND-LINE.md) is already filled in when it opens.
 
 ### 1. Lane
 
@@ -136,11 +147,12 @@ portal through the node. Signing in there works with the node's security key or 
 
 ## Where settings are stored
 
-Your last used settings (everything except the API key) are saved to `node-settings.json` in:
+Your last used settings (everything except the API key) are saved to `node-settings.json` when you start the node, in:
 
 | OS | Folder |
 | --- | --- |
-| macOS / Linux | `~/.config/Lane/` |
+| macOS | `~/Library/Application Support/Lane/` |
+| Linux | `~/.config/Lane/` |
 | Windows | `%APPDATA%\Lane\` |
 
 Delete that file to go back to the defaults.

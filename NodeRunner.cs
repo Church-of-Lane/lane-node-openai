@@ -187,6 +187,14 @@ public sealed partial class NodeRunner(SettingsStore store, ILoggerFactory logge
             : "";
     }
 
+    /// <summary>Remembers an API key for an endpoint, as if it had been entered on the page.</summary>
+    public void RememberKey(string endpoint, string key)
+    {
+        if (string.IsNullOrWhiteSpace(key)) return;
+
+        lock (_keys) _keys[Normalise(endpoint ?? "")] = key.Trim();
+    }
+
     private void Remember(Plan plan) => Remember(plan.Settings, plan.Endpoint, plan.Key);
 
     private void Remember(NodeSettings settings, string endpoint, string key)
