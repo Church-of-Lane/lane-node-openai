@@ -3,7 +3,6 @@
 ## Requirements
 
 - [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
-- The Lane NuGet packages (`Lane.Core`, `Lane.Node.Sdk`, `Lane.Nodes.Protocol`, `Lane.Providers`, version `0.1.0`). 
 - An API key for your provider (not needed for local servers such as Ollama)
 - The address of a Lane server to connect to
 
@@ -14,7 +13,7 @@ git clone https://github.com/fr-cs-peoples/lane-node-openai.git lane-node-openai
 cd lane-node-openai
 ```
 
-### Get the Lane packages
+### Install
 
 Run the install script from the repository folder:
 
@@ -23,20 +22,10 @@ Run the install script from the repository folder:
 install.bat       # Windows
 ```
 
-It installs the .NET 10 SDK into your user folder if you don't have it, downloads
-[lane-bot](https://github.com/ImNotJahan/lane-bot), builds the Lane packages into `lane-packages/` (where
-[nuget.config](nuget.config) looks for them), and builds this project. Run it again whenever you want to update the Lane
-packages.
-
-You can change what it downloads with environment variables:
-
-| Variable | What it does |
-| --- | --- |
-| `LANE_BOT_REF` | Branch or tag of lane-bot to use (default `main`) |
-| `LANE_BOT_REPO` | Another lane-bot repository URL |
-| `LANE_BOT_DIR` | Use a lane-bot folder you already have instead of downloading one |
-
-If someone gave you the `.nupkg` files directly, skip the script and copy them into `lane-packages/` instead.
+It installs the .NET 10 SDK into your user folder if you don't have it, then builds this project. The Lane packages
+(`Lane.Core`, `Lane.Nodes.Protocol`, `Lane.Node.Sdk`, `Lane.Providers`) are restored from
+[nuget.org](https://www.nuget.org/profiles/ImNotJahan) during the build, always at their newest stable version. If you already have the .NET 10 SDK, `dotnet run`
+does all of this on its own.
 
 ## Run
 
@@ -58,16 +47,14 @@ See [Command line options](COMMAND-LINE.md) for the full list.
 
 ### Update check
 
-On startup the node quietly compares itself against its upstream repositories and prints a note in the console if either
-has moved on:
+On startup the node quietly checks for updates and prints a note in the console if something has moved on:
 
 | What's behind | What to do |
 | --- | --- |
 | This repository | `git pull` |
-| The Lane packages in `lane-packages/` | Run the install script again |
+| The Lane packages, compared with nuget.org | `dotnet restore --force-evaluate` |
 
-The package check uses `lane-packages/source.txt`, which the install script writes with the lane-bot commit it packed
-from. The check needs `git` and network access; without either, or without the stamp file, it stays silent. Turn it off
+The repository check needs `git`, and both need network access; without them the check stays silent. Turn it off
 with `dotnet run -- --no-update-check`, or by setting `LANE_NO_UPDATE_CHECK`.
 
 ## Use

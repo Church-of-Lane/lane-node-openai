@@ -12,10 +12,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Lane.Core" Version="0.1.0" />
-    <PackageReference Include="Lane.Nodes.Protocol" Version="0.1.0" />
-    <PackageReference Include="Lane.Node.Sdk" Version="0.1.0" />
-    <PackageReference Include="Lane.Providers" Version="0.1.0" />
+    <PackageReference Include="Lane.Core" Version="*" />
+    <PackageReference Include="Lane.Nodes.Protocol" Version="*" />
+    <PackageReference Include="Lane.Node.Sdk" Version="*" />
+    <PackageReference Include="Lane.Providers" Version="*" />
   </ItemGroup>
 
 </Project>

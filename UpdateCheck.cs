@@ -1,24 +1,25 @@
 using System.Diagnostics;
+using System.Reflection;
+using System.Text.Json;
 
 namespace Lane.Node.OpenAi;
 
 /// <summary>
-/// Compares this checkout and the packed Lane packages against their upstream repositories on startup, and prints a
-/// suggestion when either has moved on. Every check is best effort: no git, no network or no repository means silence.
+/// Compares this checkout against its upstream repository and the Lane packages against nuget.org on startup, and
+/// prints a suggestion when either has moved on. Every check is best effort: no git, no network or no repository means silence.
 /// </summary>
 public static class UpdateCheck
 {
     private static readonly TimeSpan Timeout = TimeSpan.FromSeconds(10);
 
     /// <summary>Runs both checks in the background so startup isn't held up by the network.</summary>
-    public static void RunInBackground(string contentRoot) => _ = Task.Run(() =>
+    public static void RunInBackground(string contentRoot) => _ = Task.Run(async () =>
     {
         try
         {
-            if (FindRoot(contentRoot) is not { } root) return;
+            if (FindRoot(contentRoot) is { } root) CheckNode(root);
 
-            CheckNode(root);
-            CheckPackages(root);
+            await CheckPackagesAsync();
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
@@ -75,37 +76,76 @@ public static class UpdateCheck
 
     // --- the Lane packages ---------------------------------------------------
 
-    private static void CheckPackages(string root)
+    private static readonly string[] LanePackages = ["Lane.Core", "Lane.Nodes.Protocol", "Lane.Node.Sdk", "Lane.Providers"];
+
+    private static async Task CheckPackagesAsync()
     {
-        string stamp = Path.Combine(root, "lane-packages", "source.txt");
+        using HttpClient http = new() { Timeout = Timeout };
 
-        if (!File.Exists(stamp)) return;
+        List<string> behind = [];
 
-        string? repo = null, reference = null, commit = null;
-
-        foreach (string line in File.ReadAllLines(stamp))
+        foreach (string id in LanePackages)
         {
-            int equals = line.IndexOf('=');
+            if (LoadedVersion(id) is not { } current) continue;
+            if (await LatestVersionAsync(http, id) is not { } latest || latest <= current) continue;
 
-            if (equals <= 0) continue;
-
-            string value = line[(equals + 1)..].Trim();
-
-            switch (line[..equals].Trim())
-            {
-                case "repo":   repo      = value; break;
-                case "ref":    reference = value; break;
-                case "commit": commit    = value; break;
-            }
+            behind.Add($"{id} {current} -> {latest}");
         }
 
-        if (string.IsNullOrEmpty(repo) || string.IsNullOrEmpty(reference) || string.IsNullOrEmpty(commit)) return;
-
-        if (RemoteHead(root, repo, reference) is not { } latest || latest == commit) return;
+        if (behind.Count == 0) return;
 
         Report(
-            $"The Lane packages are behind {repo} ({reference}).",
-            $"Update them by running the install script again:  {(OperatingSystem.IsWindows() ? "install.bat" : "./install.sh")}");
+            $"Newer Lane packages are on NuGet: {string.Join(", ", behind)}.",
+            "Pick them up with:  dotnet restore --force-evaluate");
+    }
+
+    /// <summary>The package version of the Lane assembly this node runs with, or null if it can't be read.</summary>
+    private static Version? LoadedVersion(string id)
+    {
+        try
+        {
+            Assembly assembly = Assembly.Load(new AssemblyName(id));
+
+            // Packing stamps the package version (plus "+<commit>") as the informational version.
+            string? informational = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+
+            if (informational is not null && Version.TryParse(informational.Split('+', '-')[0], out Version? version))
+                return version;
+
+            return assembly.GetName().Version;
+        }
+        catch (Exception ex) when (ex is FileNotFoundException or FileLoadException or BadImageFormatException)
+        {
+            return null;
+        }
+    }
+
+    /// <summary>The newest stable version of <paramref name="id"/> on nuget.org, or null if it can't be read.</summary>
+    private static async Task<Version?> LatestVersionAsync(HttpClient http, string id)
+    {
+        try
+        {
+            string url = $"https://api.nuget.org/v3-flatcontainer/{id.ToLowerInvariant()}/index.json";
+
+            using JsonDocument index = JsonDocument.Parse(await http.GetStringAsync(url));
+
+            Version? latest = null;
+
+            foreach (JsonElement entry in index.RootElement.GetProperty("versions").EnumerateArray())
+            {
+                // Skip prereleases ("1.0.0-beta"), which contain a dash.
+                if (entry.GetString() is { } text && !text.Contains('-') &&
+                    Version.TryParse(text, out Version? version) && (latest is null || version > latest))
+                    latest = version;
+            }
+
+            return latest;
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or JsonException or
+                                         KeyNotFoundException or InvalidOperationException)
+        {
+            return null;
+        }
     }
 
     // --- helpers -------------------------------------------------------------
