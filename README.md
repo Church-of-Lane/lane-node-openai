@@ -108,8 +108,9 @@ These are only used with the matching template's endpoint.
 
 ### 3. Capabilities
 
-Tick what the model supports (tools, streaming, images, structured output, and so on). Each template ticks sensible
-defaults.
+Tick what the model supports (tools, streaming, images, audio input, structured output, and so on). Each template ticks
+sensible defaults. **Audio** is off in every template: tick it only for a model that accepts audio input, since Lane
+strips audio clips from requests to a model without it.
 
 ### 4. Identity
 

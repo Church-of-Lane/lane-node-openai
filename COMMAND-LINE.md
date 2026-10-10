@@ -102,8 +102,9 @@ Each is only used with its own template's endpoint.
 
 Names are case-insensitive, and the option can be repeated or comma-separated. Like `--header`, it replaces the
 template's list instead of adding to it. `dotnet run -- --help` prints the names this build accepts; at the time of
-writing they are `Tools`, `ParallelTools`, `Streaming`, `Images`, `PromptCaching`, `StructuredOutput`, `StopSequences`
-and `Thinking`.
+writing they are `Tools`, `ParallelTools`, `Streaming`, `Images`, `PromptCaching`, `StructuredOutput`, `StopSequences`,
+`Thinking` and `Audio`. `Audio` means the model accepts audio input; without it Lane strips audio clips from a request
+before it is sent.
 
 ```sh
 dotnet run -- --capabilities Tools,Streaming --capabilities Images
